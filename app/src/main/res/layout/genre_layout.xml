@@ -11,19 +11,23 @@
         android:id="@+id/genre_circle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:paddingStart="5dp"
+        android:paddingStart="8dp"
         android:paddingEnd="5dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="6dp"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
-
         android:src="@drawable/genre_circle"/>
+
     <TextView
         android:id="@+id/genre_text"
-        android:text="Genre"
-        android:paddingEnd="10dp"
-        android:layout_toEndOf="@+id/genre_circle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
-        android:textColor="@color/white"/>
+        android:layout_toEndOf="@+id/genre_circle"
+        android:gravity="center"
+        android:paddingEnd="10dp"
+        android:text="Genre"
+        android:textColor="@color/black"
+        android:textSize="19sp"
+        android:textStyle="bold" />
 </RelativeLayout>

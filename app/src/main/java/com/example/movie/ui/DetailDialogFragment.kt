@@ -134,14 +134,16 @@ class DetailDialogFragment() : DialogFragment(){
                 movieEntity.genreIds.forEach { genreId ->
                     val genreView = inflater.inflate(R.layout.genre_layout, genreLayout, false)
                     val genreText: TextView = genreView.findViewById(R.id.genre_text)
-                    val genreCircle: ImageView = genreView.findViewById(R.id.genre_circle)
                     val genreName = genres.find { it.id == genreId }?.name ?: "Unknown"
+                    val circleImage: ImageView = genreView.findViewById(R.id.genre_circle)
                     val genreLayoutBg: RelativeLayout = genreView.findViewById(R.id.genre_layout_bg)
                     val genreColor = GenreColors.getColorForGenre(genreName)
-                    val backgroundDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.genre_background) as GradientDrawable
-                    backgroundDrawable.setColor(genreColor!!)
-                    genreLayoutBg.background = backgroundDrawable
+                    val circleDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.genre_circle)
+                    val strokeDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.genre_background) as GradientDrawable
+                    strokeDrawable.setStroke(9, genreColor!!)
+                    genreLayoutBg.background = strokeDrawable
 
+                    circleImage.setColorFilter(genreColor, PorterDuff.Mode.SRC_IN)
                     genreText.text = genreName
 
                     genreLayout.addView(genreView)
