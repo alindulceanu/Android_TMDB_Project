@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="tabSelectedColor">@color/purple_500</color>
+    <color name="gradient_start">#CD8A69FF</color>
+    <color name="gradient_end">#0781ED</color>
+    <color name="gradient_start_background">#4F21A6</color>
+    <color name="gradient_end_background">#672BDC</color>
+    <color name="transparent">@android:color/transparent</color>
+
+    <color name="Adventure">#34B111</color>
+    <color name="Fantasy">#E4E12C</color>
+    <color name="Animation">#CC56ED</color>
+    <color name="Drama">#490C85</color>
+    <color name="Horror">#19470E</color>
+    <color name="Action">#830000</color>
+    <color name="Comedy">#F60A70</color>
+    <color name="History">#00188F</color>
+    <color name="Western">#2C3543</color>
+    <color name="Thriller">#8F3E00</color>
+    <color name="Crime">#FF0000</color>
+    <color name="Documentary">#2D5123</color>
+    <color name="Science_Fiction">#3C6CFF</color>
+    <color name="Mystery">#6B499A</color>
+    <color name="Music">#FF8C00</color>
+    <color name="Romance">#C016D3</color>
+    <color name="Family">#00B8D4</color>
+    <color name="War">#B71C1C</color>
+    <color name="TV_Movie">#B2FF59</color>
+</resources>

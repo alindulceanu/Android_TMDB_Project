@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/genre_layout_bg"
+    android:orientation="horizontal"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:background="@drawable/genre_background"
+    android:layout_marginBottom="2dp">
+
+    <ImageView
+        android:id="@+id/genre_circle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingStart="5dp"
+        android:paddingEnd="5dp"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
+
+        android:src="@drawable/genre_circle"/>
+    <TextView
+        android:id="@+id/genre_text"
+        android:text="Genre"
+        android:paddingEnd="10dp"
+        android:layout_toEndOf="@+id/genre_circle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="16sp"
+        android:textColor="@color/white"/>
+</RelativeLayout>

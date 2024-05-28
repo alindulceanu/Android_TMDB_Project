@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Movie</string>
+    <string name="tab_1" />
+    <string name="filterText">Filter by:</string>
+    <string name="rating">RATING</string>
+    <string name="popularity">POPULARITY</string>
+    <string name="favorites">FAVORITES</string>
+    <string name="movie_image">Movie Image</string>
+    <string name="date">Date</string>
+    <string name="_0">0%</string>
+    <string name="title">Title</string>
+    <string name="newest">NEW</string>
+</resources>
