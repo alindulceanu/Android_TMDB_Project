@@ -138,7 +138,6 @@ class DetailDialogFragment() : DialogFragment(){
                     val circleImage: ImageView = genreView.findViewById(R.id.genre_circle)
                     val genreLayoutBg: RelativeLayout = genreView.findViewById(R.id.genre_layout_bg)
                     val genreColor = GenreColors.getColorForGenre(genreName)
-                    val circleDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.genre_circle)
                     val strokeDrawable = ContextCompat.getDrawable(requireContext(), R.drawable.genre_background) as GradientDrawable
                     strokeDrawable.setStroke(9, genreColor!!)
                     genreLayoutBg.background = strokeDrawable
