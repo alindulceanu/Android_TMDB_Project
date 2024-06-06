@@ -1,176 +1,111 @@
 package com.example.movie
 
+import android.content.res.Configuration
 import android.os.Bundle
-import androidx.activity.viewModels
-import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import androidx.room.Room
-import com.example.movie.data.remote.MovieService
-import com.example.movie.database.MovieDatabase
-import com.example.movie.database.model.MovieEntity
-import com.example.movie.ui.MovieAdapter
-import com.example.movie.viewmodel.MovieViewModel
-import com.example.movie.viewmodel.MovieViewModelFactory
-import com.example.movie.viewmodel.events.FilterType
-import com.example.movie.viewmodel.events.MovieEvents
-import com.example.movie.viewmodel.repositories.GenreRepository
-import com.google.android.material.tabs.TabLayout
-import kotlinx.coroutines.launch
-import androidx.core.content.ContextCompat
-import android.graphics.LinearGradient
-import android.graphics.Shader
-import android.widget.TextView
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
-import com.example.movie.R
-import com.example.movie.database.GenreDatabase
-import com.example.movie.database.model.GenreEntity
-import com.example.movie.ui.DetailDialogFragment
-import com.example.movie.ui.GenreColors
+import android.view.SurfaceControlViewHost.SurfacePackage
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.example.movie.ui.theme.MovieTheme
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
-class MainActivity : AppCompatActivity() {
-    private val service = MovieService.create()
-    private lateinit var recycledView: RecyclerView
-    private lateinit var manager: RecyclerView.LayoutManager
-    private lateinit var myAdapter: MovieAdapter
-    private var movies: List<MovieEntity> = emptyList()
-    private var genreList: List<GenreEntity> = emptyList()
-    private lateinit var tabLayout: TabLayout
 
-    private lateinit var db: MovieDatabase
-    private lateinit var genreDB: GenreDatabase
-    private lateinit var genreRepository: GenreRepository
-    private lateinit var viewModel: MovieViewModel
-
+class MainActivity: ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-
-        db = Room
-            .databaseBuilder(
-                applicationContext,
-                MovieDatabase::class.java,
-                "movie_db")
-            .fallbackToDestructiveMigration()
-            .build()
-
-
-        genreDB = Room
-            .databaseBuilder(
-                applicationContext,
-                GenreDatabase::class.java,
-                "genre_db")
-            .build()
-
-        GenreColors.initialize(this)
-        genreRepository = GenreRepository(genreDB.dao)
-
-        viewModel = ViewModelProvider(this, MovieViewModelFactory(application, db.dao, genreRepository)).get(MovieViewModel::class.java)
-
-        tabLayout = findViewById(R.id.tabLayout)
-
-        manager = LinearLayoutManager(this@MainActivity, LinearLayoutManager.HORIZONTAL, false)
-        myAdapter = MovieAdapter(movies) { movie ->
-            viewModel.onEvent(MovieEvents.ShowMovieInfo(movie))
-        }
-
-        recycledView = findViewById<RecyclerView>(R.id.rvMovies).apply {
-            layoutManager = manager
-            adapter = myAdapter
-        }
-
-        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.popularity)))
-        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.rating)))
-        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.favorites)))
-        tabLayout.addTab(tabLayout.newTab().setText(getString(R.string.newest)))
-
-        for (i in 0 until tabLayout.tabCount) {
-            val tab = tabLayout.getTabAt(i)
-            tab?.customView = layoutInflater.inflate(R.layout.custom_tab, null)
-            tab?.customView?.findViewById<TextView>(R.id.tab_text)?.text = tab?.text
-        }
-
-        tabLayout.addOnTabSelectedListener(object: TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab) {
-                when (tab.position) {
-                    0 -> viewModel.onEvent(MovieEvents.FilterMovies(FilterType.POPULARITY))
-                    1 -> viewModel.onEvent(MovieEvents.FilterMovies(FilterType.RATING))
-                    2 -> viewModel.onEvent(MovieEvents.FilterMovies(FilterType.FAVORITES))
-                    3 -> viewModel.onEvent(MovieEvents.FilterMovies(FilterType.RELEASE_DATE))
-                }
-                tab.customView?.findViewById<TextView>(R.id.tab_text)?.let {
-                    applyGradientToText(it)
-                }
-                recycledView.stopScroll()
-                recycledView.smoothScrollToPosition(0)
-            }
-
-            override fun onTabUnselected(tab: TabLayout.Tab?) {
-                tab?.customView?.findViewById<TextView>(R.id.tab_text)?.let {
-                    it.paint.shader = null // Remove gradient
-                    it.setTextColor(ContextCompat.getColor(this@MainActivity, R.color.purple_500))
-                }
-            }
-
-            override fun onTabReselected(tab: TabLayout.Tab?) {
-                recycledView.stopScroll()
-                recycledView.smoothScrollToPosition(0)
-            }
-        })
-
-        val initialTab = tabLayout.getTabAt(tabLayout.selectedTabPosition)
-        initialTab?.customView?.findViewById<TextView>(R.id.tab_text)?.let {
-            applyGradientToText(it)
-        }
-
-        lifecycleScope.launch {
-            try {
-                val genreResponse = service.getGenres()
-                genreList = genreResponse.genres
-                viewModel.insertAllGenres(genreList)
-                viewModel.getAllGenres()
-                val movieResponse = service.getMovies()
-                movies = movieResponse.results
-                movies.forEach { movie ->
-                    db.dao.insertMovie(movie)
-                }
-                viewModel.state.collect { state ->
-                    println("[LOGXD] ${state.movies}")
-                    myAdapter.submitList(state.movies)
-
-                    if (state.isReadingInfo) {
-                        showDetailDialog(state.movieInfo)
-                        viewModel.onEvent(MovieEvents.HideMovieInfo)
-                    }
-                }
-            } catch (e: Exception) {
-                // Handle possible errors here
-                println("bruh" + e.message.toString())
+        setContent {
+            MovieTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ){
+                Conversation(messages = messageList)
             }
         }
     }
+}}
+val messageList: List<Book> = listOf(Book("xd", "xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),Book("xd", "xd"),Book("xd", "xd"),Book("xd", "xd"),Book("xd", "xd"),Book("xd", "xd"))
 
-    private fun showDetailDialog(movie: MovieEntity?) {
-        if (movie == null) {
-            println("No movie yet")
-        } else {
-            val dialogFragment = DetailDialogFragment.newInstance(movie)
-            dialogFragment.show(supportFragmentManager, "detailDialog")
-        }
-    }
-
-    private fun applyGradientToText(textView: TextView) {
-        val paint = textView.paint
-        val width = paint.measureText(textView.text.toString())
-        val textShader: Shader = LinearGradient(
-            0f, 0f, width, textView.textSize,
-            intArrayOf(
-                ContextCompat.getColor(this, R.color.gradient_start),
-                ContextCompat.getColor(this, R.color.gradient_end)
-            ),
-            null, Shader.TileMode.CLAMP
+data class Book (val author: String, val book: String)
+@Composable
+fun Message(book: Book){
+    Row {
+        Image(
+            painter = painterResource(id = R.drawable.favorite_button),
+            contentDescription = "xDD",
+            modifier = Modifier
+                .size(45.dp),
+            colorFilter = ColorFilter.tint(Color.Yellow)
         )
-        textView.paint.shader = textShader
+        Spacer(modifier = Modifier.width(8.dp))
+
+        var isExpanded by remember { mutableStateOf(false) }
+        val surfaceColor by animateColorAsState(
+            if (isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
+        )
+        Column(modifier = Modifier.clickable { isExpanded = !isExpanded }) {
+                Text(
+                    text = book.author,
+                    color = MaterialTheme.colorScheme.secondary,
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+            Surface(shape = MaterialTheme.shapes.medium, shadowElevation = 5.dp, color = surfaceColor) {
+                Text(
+                    modifier = Modifier.padding(all = 4.dp),
+                    maxLines = if (isExpanded) Int.MAX_VALUE else 1,
+                    text = book.book,
+                    style = MaterialTheme.typography.bodyLarge
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun Conversation(messages: List<Book>){
+    LazyColumn {
+        items(messages) { message ->
+            Message(message)
+        }
+    }
+}
+@Preview(name = "Light Theme")
+@Preview(name = "Dark Theme",
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    showBackground = true,
+    )
+@Composable
+fun PreviewConversation() {
+    MovieTheme {
+        Surface{
+            Conversation(messages = messageList)
+        }
     }
 }
