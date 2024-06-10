@@ -8,13 +8,12 @@ import com.example.movie.viewmodel.repositories.GenreRepository
 
 
 class MovieViewModelFactory(
-    private val application: Application,
     private val dao: MovieDao,
     private val repository: GenreRepository
 ) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MovieViewModel::class.java)) {
-            return MovieViewModel(application, dao, repository) as T
+            return MovieViewModel(dao, repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

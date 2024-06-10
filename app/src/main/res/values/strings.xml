@@ -10,4 +10,5 @@
     <string name="_0">0%</string>
     <string name="title">Title</string>
     <string name="newest">NEW</string>
+    <string name="placeholder_search">Search</string>
 </resources>

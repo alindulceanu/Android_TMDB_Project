@@ -13,15 +13,21 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -34,8 +40,18 @@ import androidx.compose.ui.unit.dp
 import com.example.movie.ui.theme.MovieTheme
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.room.Room
+import com.example.movie.database.GenreDatabase
+import com.example.movie.database.MovieDatabase
+import com.example.movie.ui.screens.MainScreen
+import com.example.movie.viewmodel.MovieViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class MainActivity: ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,68 +60,11 @@ class MainActivity: ComponentActivity() {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
-                ){
-                Conversation(messages = messageList)
-            }
-        }
-    }
-}}
-val messageList: List<Book> = listOf(Book("xd", "xdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"),Book("xd", "xd"),Book("xd", "xd"),Book("xd", "xd"),Book("xd", "xd"),Book("xd", "xd"))
-
-data class Book (val author: String, val book: String)
-@Composable
-fun Message(book: Book){
-    Row {
-        Image(
-            painter = painterResource(id = R.drawable.favorite_button),
-            contentDescription = "xDD",
-            modifier = Modifier
-                .size(45.dp),
-            colorFilter = ColorFilter.tint(Color.Yellow)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-
-        var isExpanded by remember { mutableStateOf(false) }
-        val surfaceColor by animateColorAsState(
-            if (isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface
-        )
-        Column(modifier = Modifier.clickable { isExpanded = !isExpanded }) {
-                Text(
-                    text = book.author,
-                    color = MaterialTheme.colorScheme.secondary,
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-            Surface(shape = MaterialTheme.shapes.medium, shadowElevation = 5.dp, color = surfaceColor) {
-                Text(
-                    modifier = Modifier.padding(all = 4.dp),
-                    maxLines = if (isExpanded) Int.MAX_VALUE else 1,
-                    text = book.book,
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                ) {
+                    MainScreen()
+                }
             }
         }
     }
 }
 
-@Composable
-fun Conversation(messages: List<Book>){
-    LazyColumn {
-        items(messages) { message ->
-            Message(message)
-        }
-    }
-}
-@Preview(name = "Light Theme")
-@Preview(name = "Dark Theme",
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    showBackground = true,
-    )
-@Composable
-fun PreviewConversation() {
-    MovieTheme {
-        Surface{
-            Conversation(messages = messageList)
-        }
-    }
-}

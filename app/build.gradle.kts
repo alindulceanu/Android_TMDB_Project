@@ -4,7 +4,9 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     kotlin("plugin.serialization") version "1.9.23"
     kotlin("kapt")
-    id("com.google.devtools.ksp") version "1.9.23-1.0.20"
+    id("kotlin-kapt")
+//    id("com.google.devtools.ksp") version "1.9.23-1.0.20"
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -44,7 +46,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.13"
     }
     packaging {
         resources {
@@ -53,14 +55,18 @@ android {
     }
 }
 
-//repositories {
-//    mavenCentral()
-//}
+kapt {
+    correctErrorTypes = true
+}
 
 val ktor_version = "2.3.10"
 val room_version = "2.6.1"
 
 dependencies {
+    kapt ("com.github.bumptech.glide:compiler:4.12.0")
+    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation ("com.github.skydoves:landscapist-glide:1.5.2")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:{latest_version}")
     implementation ("androidx.core:core-ktx:1.10.0")
     implementation ("androidx.fragment:fragment-ktx:1.6.0")
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0")
@@ -75,8 +81,13 @@ dependencies {
     implementation ("com.github.bumptech.glide:annotations:4.12.0")
     kapt ("com.github.bumptech.glide:compiler:4.12.0")
     implementation("com.google.code.gson:gson:2.8.9")
-//    implementation("com.google.dagger:dagger-compiler:2.51.1")
-//    ksp("com.google.dagger:dagger-compiler:2.51.1")
+    // Dagger-Hilt
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+//    annotationProcessor("androidx.hilt:hilt-compiler:1.2.0")
+//    implementation("androidx.hilt:hilt-lifecycle-viewmodel:1.0.0-alpha03")
+
     kapt("androidx.room:room-compiler:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
     implementation("androidx.room:room-runtime:$room_version")

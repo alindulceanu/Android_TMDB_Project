@@ -1,9 +1,8 @@
 package com.example.movie.viewmodel
 
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movie.database.dao.MovieDao
 import com.example.movie.database.model.GenreEntity
@@ -12,6 +11,7 @@ import com.example.movie.viewmodel.events.FilterType
 import com.example.movie.viewmodel.events.MovieEvents
 import com.example.movie.viewmodel.repositories.GenreRepository
 import com.example.movie.viewmodel.state.MovieState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,12 +22,13 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class MovieViewModel(
-    application: Application,
+@HiltViewModel
+class MovieViewModel @Inject constructor(
     private val dao: MovieDao,
     private val repository: GenreRepository
-): AndroidViewModel(application) {
+): ViewModel() {
 
     private val _filterType = MutableStateFlow(FilterType.POPULARITY)
     private val _genres = MutableLiveData<List<GenreEntity>>()

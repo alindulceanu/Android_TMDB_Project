@@ -10,7 +10,6 @@ class GenreRepository(private val genreDao: GenreDao) {
         return genreDao.getGenreByName(name)
     }
 
-
     suspend fun getGenreById(id: Int): GenreEntity {
         return genreDao.getGenreById(id)
     }

@@ -19,7 +19,7 @@
                     android:thicknessRatio="18"
                     android:innerRadiusRatio="2.5"
                     android:useLevel="true">
-                    <solid android:color="@color/black"/>
+                    <solid android:color="@color/Adventure"/>
                 </shape>
         </item>
     </layer-list>
