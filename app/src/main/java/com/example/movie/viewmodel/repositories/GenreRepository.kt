@@ -3,8 +3,12 @@ package com.example.movie.viewmodel.repositories
 import androidx.room.Query
 import com.example.movie.database.dao.GenreDao
 import com.example.movie.database.model.GenreEntity
+import com.example.movie.database.model.MovieEntity
+import javax.inject.Inject
 
-class GenreRepository(private val genreDao: GenreDao) {
+class GenreRepository @Inject constructor(
+    private val genreDao: GenreDao
+) {
 
     suspend fun getGenreByName(name: String): GenreEntity {
         return genreDao.getGenreByName(name)

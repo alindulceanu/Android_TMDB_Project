@@ -11,3 +11,7 @@ data class GenreEntity(
     val id: Int,
     val name: String
 )
+fun getGenreNameById(genres: List<GenreEntity>, id: Int): String? {
+    return genres.find { it.id == id }?.name
+}
+

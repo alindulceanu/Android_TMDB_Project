@@ -14,6 +14,7 @@ material = "1.6.1"
 activity = "1.4.0"
 engageCore = "1.5.1"
 uiDesktop = "1.6.7"
+runtimeLivedata = "1.6.7"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -36,6 +37,7 @@ google-material = { module = "com.google.android.material:material", version.ref
 androidx-activity = { module = "androidx.activity:activity-ktx", version.ref = "activity" }
 engage-core = { group = "com.google.android.engage", name = "engage-core", version.ref = "engageCore" }
 androidx-ui-desktop = { group = "androidx.compose.ui", name = "ui-desktop", version.ref = "uiDesktop" }
+androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

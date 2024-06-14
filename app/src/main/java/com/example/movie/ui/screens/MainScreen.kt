@@ -2,6 +2,8 @@ package com.example.movie.ui.screens
 
 import android.widget.ProgressBar
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -45,9 +47,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.graphics.toColor
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.movie.R
 import com.example.movie.data.remote.HttpRoutes
 import com.example.movie.database.model.MovieEntity
+import com.example.movie.ui.tools.DateUtils
 import com.example.movie.ui.tools.ProgressBar
 import com.example.movie.viewmodel.MovieViewModel
 import com.example.movie.viewmodel.events.FilterType
@@ -56,18 +60,16 @@ import com.skydoves.landscapist.glide.GlideImage
 import dagger.Module
 
 @Composable
-fun MainScreen(modifier: Modifier = Modifier){
-    val movieViewModel = hiltViewModel<MovieViewModel>()
+fun MainScreen(nav: NavController, modifier: Modifier = Modifier, movieViewModel: MovieViewModel = hiltViewModel()){
     val state by movieViewModel.state.collectAsState()
 
     Column(modifier = modifier.fillMaxWidth()) {
         SortTabs(tabs = sortTabs, {
             movieViewModel.onEvent(MovieEvents.FilterMovies(it))
             },
-            modifier = modifier
         )
         Spacer(modifier = modifier.height(100.dp))
-        MovieList(state.movies, {})
+        MovieList(state.movies, { nav.navigate("itemDetail/${it}") })
     }
 }
 @Composable
@@ -120,11 +122,15 @@ fun SortTabs(tabs: List<SortTabs>, onClick: (FilterType) -> Unit, modifier: Modi
 }
 
 @Composable
-fun MovieItem(movie : MovieEntity, onClick: (Int) -> Unit, modifier: Modifier = Modifier){
+fun MovieItem(movie : MovieEntity, onClick: () -> Unit, modifier: Modifier = Modifier){
     Column(
         modifier = modifier
             .width(250.dp)
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable (
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { onClick() },
         horizontalAlignment = Alignment.Start
     ){
         GlideImageComposable(HttpRoutes.BASE_URL_IMAGE + HttpRoutes.ORIGINAL_SIZE + movie.posterPath,
@@ -140,7 +146,7 @@ fun MovieItem(movie : MovieEntity, onClick: (Int) -> Unit, modifier: Modifier = 
         )
         Spacer(modifier = modifier.height(5.dp))
         Text(
-            text = movie.releaseDate,
+            text = DateUtils.toDisplayDateString(movie.releaseDate)!!,
             modifier = modifier,
             style = MaterialTheme.typography.bodyMedium,
             color = Color.DarkGray,
@@ -188,7 +194,7 @@ fun GlideImageComposable(
 @Composable
 fun MainScreenPreview(){
     val modifier = Modifier
-    val movies: List<MovieEntity> = listOf(MovieEntity(0,false,false,"/fqv8v6AycXKsivp1T5yKtLbGXce.jpg", listOf(1,2,3),3123,"en","test", "testoverview", 7.88, "/gKkl37BQuKTanygYQG1pyYgLVgf.jpg", "testdate", "testtitleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",false, 7.45,1231),MovieEntity(0,false,false,"/fqv8v6AycXKsivp1T5yKtLbGXce.jpg", listOf(1,2,3),3123,"en","test", "testoverview", 7.88, "/gKkl37BQuKTanygYQG1pyYgLVgf.jpg", "testdate", "testtitle",false, 7.45,1231))
+    val movies: List<MovieEntity> = listOf(MovieEntity(0,false,false,"/fqv8v6AycXKsivp1T5yKtLbGXce.jpg", listOf(1,2,3),3123,"en","test", "testoverview", 7.88, "/gKkl37BQuKTanygYQG1pyYgLVgf.jpg", "2022-05-21", "testtitleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",false, 7.45,1231),MovieEntity(0,false,false,"/fqv8v6AycXKsivp1T5yKtLbGXce.jpg", listOf(1,2,3),3123,"en","test", "testoverview", 7.88, "/gKkl37BQuKTanygYQG1pyYgLVgf.jpg", "2022-05-21", "testtitle",false, 7.45,1231))
     Column(modifier = modifier.fillMaxWidth()) {
         SortTabs(tabs = sortTabs,{}, modifier = modifier)
         Spacer(modifier = modifier.height(100.dp))

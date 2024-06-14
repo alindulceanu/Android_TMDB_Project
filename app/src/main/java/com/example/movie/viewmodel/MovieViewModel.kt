@@ -4,12 +4,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.movie.data.remote.MovieService
 import com.example.movie.database.dao.MovieDao
 import com.example.movie.database.model.GenreEntity
 import com.example.movie.database.model.MovieEntity
 import com.example.movie.viewmodel.events.FilterType
 import com.example.movie.viewmodel.events.MovieEvents
 import com.example.movie.viewmodel.repositories.GenreRepository
+import com.example.movie.viewmodel.repositories.MovieRepository
 import com.example.movie.viewmodel.state.MovieState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -26,23 +28,25 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MovieViewModel @Inject constructor(
-    private val dao: MovieDao,
-    private val repository: GenreRepository
+    private val repository: MovieRepository
 ): ViewModel() {
 
+    init {
+        val service: MovieService = MovieService.create()
+
+        viewModelScope.launch {
+            insertMoviesFromRequest(
+                service.getMovies().results
+            )
+        }
+    }
+
     private val _filterType = MutableStateFlow(FilterType.POPULARITY)
-    private val _genres = MutableLiveData<List<GenreEntity>>()
-    val genres : LiveData<List<GenreEntity>> get() = _genres
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val _movies = _filterType
         .flatMapLatest { filterType ->
-            when(filterType){
-                FilterType.POPULARITY -> dao.orderMoviesByPopularity()
-                FilterType.FAVORITES -> dao.orderFavouriteMovies()
-                FilterType.RATING -> dao.orderMoviesByRating()
-                FilterType.RELEASE_DATE -> dao.orderMoviesByDate()
-            }
+            repository.sortMovies(filterType)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList<MovieEntity>())
 
@@ -61,38 +65,21 @@ class MovieViewModel @Inject constructor(
             is MovieEvents.FilterMovies -> {
                 _filterType.value = event.filterType
             }
-            MovieEvents.HideMovieInfo -> {
-                _state.update {it.copy(
-                    isReadingInfo = false
-                )}
-            }
-            is MovieEvents.ShowMovieInfo -> {
-                _state.update { it.copy(
-                    movieInfo = event.movie,
-                    isReadingInfo = true
-                )}
-            }
             is MovieEvents.FavoriteMovie -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    dao.favoriteMovie(event.id)
+                    repository.favoriteMovie(event.id)
                 }
             }
         }
     }
 
-    fun getAllGenres(){
-        viewModelScope.launch{
-            _genres.postValue(repository.getAllGenres())
+    private suspend fun insertMoviesFromRequest (movies: List<MovieEntity>) {
+        movies.forEach { movie ->
+            repository.insertMovie(movie)
         }
     }
-
-    fun insertAllGenres(genres: List<GenreEntity>){
-        viewModelScope.launch {
-            repository.insertAllGenres(*genres.toTypedArray())
-        }
+    private operator fun <T> StateFlow<T>.get(id: Int): MovieEntity {
+        return this[id]
     }
 }
 
-private operator fun <T> StateFlow<T>.get(id: Int): MovieEntity {
-    return this[id]
-}

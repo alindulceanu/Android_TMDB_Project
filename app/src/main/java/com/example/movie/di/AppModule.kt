@@ -8,6 +8,7 @@ import com.example.movie.database.MovieDatabase
 import com.example.movie.database.dao.GenreDao
 import com.example.movie.database.dao.MovieDao
 import com.example.movie.viewmodel.repositories.GenreRepository
+import com.example.movie.viewmodel.repositories.MovieRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,7 +29,6 @@ object AppModule {
             .fallbackToDestructiveMigration()
             .build()
     }
-
     @Provides
     @Singleton
     fun provideGenreDatabase(app: Application): GenreDatabase {
@@ -53,5 +53,10 @@ object AppModule {
     @Singleton
     fun provideGenreRepository(dao: GenreDao): GenreRepository{
         return GenreRepository(dao)
+    }
+    @Provides
+    @Singleton
+    fun provideMovieRepository(dao: MovieDao): MovieRepository{
+        return MovieRepository(dao)
     }
 }
