@@ -21,14 +21,14 @@ interface MovieDao {
     @Delete
     suspend fun deleteMovie(movie: MovieEntity)
 
-    @Query("UPDATE MovieEntity SET favourite = NOT favourite WHERE idDatabase = :id")
-    suspend fun favoriteMovie(id: Int)
+    @Query("UPDATE MovieEntity SET favourite = NOT favourite WHERE idDatabase = :idDatabase")
+    suspend fun favoriteMovie(idDatabase: Int)
 
     @Query("SELECT * FROM MovieEntity")
     fun getAllMovies(): Flow<List<MovieEntity>>
 
-    @Query("SELECT * FROM MovieEntity WHERE id = :id")
-    fun getMovieByID(id: Int): Flow<MovieEntity?>
+    @Query("SELECT * FROM MovieEntity WHERE idDatabase = :idDatabase")
+    fun getMovieById(idDatabase: Int): Flow<MovieEntity?>
 
 //    @Query("SELECT * FROM MovieEntity WHERE genreIds = :genre")
 //    suspend fun orderMoviesByGenre(genre: Int): Flow<List<MovieEntity>>

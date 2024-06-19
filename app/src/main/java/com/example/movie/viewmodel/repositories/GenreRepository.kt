@@ -1,9 +1,7 @@
 package com.example.movie.viewmodel.repositories
 
-import androidx.room.Query
 import com.example.movie.database.dao.GenreDao
 import com.example.movie.database.model.GenreEntity
-import com.example.movie.database.model.MovieEntity
 import javax.inject.Inject
 
 class GenreRepository @Inject constructor(
@@ -24,4 +22,5 @@ class GenreRepository @Inject constructor(
     suspend fun insertAllGenres(vararg genres: GenreEntity){
         genreDao.insertAllGenres(*genres)
     }
+
 }

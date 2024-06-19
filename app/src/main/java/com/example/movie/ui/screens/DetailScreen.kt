@@ -1,6 +1,5 @@
 package com.example.movie.ui.screens
 
-import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.LinearGradient
@@ -8,7 +7,6 @@ import android.graphics.Paint
 import android.graphics.PorterDuff
 import android.graphics.PorterDuffXfermode
 import android.graphics.Shader
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,7 +17,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -28,11 +25,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -41,8 +33,6 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -52,7 +42,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -69,27 +58,21 @@ import com.example.movie.database.model.MovieEntity
 import com.example.movie.viewmodel.DetailViewModel
 import com.skydoves.landscapist.glide.GlideImage
 import java.security.MessageDigest
-import androidx.compose.foundation.Canvas
-import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.core.graphics.toColor
+import androidx.compose.ui.text.style.TextIndent
+import androidx.compose.ui.unit.TextUnit
 import com.example.movie.database.model.getGenreNameById
 import com.example.movie.ui.GenreColors
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 
 @Composable
 fun DetailScreen(nav: NavController,
                  movieId: String,
                  modifier: Modifier = Modifier,
                  viewModel: DetailViewModel = hiltViewModel(),
-                 genreColors: GenreColors
                  ) {
     LaunchedEffect(movieId) {
         viewModel.fetchItemById(movieId.toInt())
@@ -98,14 +81,14 @@ fun DetailScreen(nav: NavController,
     val movie by viewModel.movie.observeAsState()
     val genres by viewModel.genres.observeAsState(emptyList())
 
-    if (movie != null) {
+    if (movie != null && genres.isNotEmpty()) {
         DrawScreen(
             movie = movie!!,
             genres = genres,
-            onBackClick = { nav.navigateUp() },
-            onFavoriteClick = {},
-            genreColors = genreColors
+            onBackClick = { nav.popBackStack() },
+            onFavoriteClick = { viewModel.favoriteMovie() },
         )
+
     } else {
         Text("Loading...", modifier = modifier.fillMaxSize())
     }
@@ -117,7 +100,6 @@ fun DrawScreen(movie: MovieEntity,
                modifier: Modifier = Modifier,
                onBackClick: () -> Unit,
                onFavoriteClick: () -> Unit,
-               genreColors: GenreColors
 ) {
     GlideImg (
         imageUrl = HttpRoutes.BASE_URL_IMAGE + HttpRoutes.ORIGINAL_SIZE + movie.backdropPath,
@@ -158,7 +140,7 @@ fun DrawScreen(movie: MovieEntity,
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
                             indication = null
-                        ) { },
+                        ) { onFavoriteClick() },
                     contentScale = ContentScale.Fit
                 )
             }
@@ -196,14 +178,14 @@ fun DrawScreen(movie: MovieEntity,
                         painterResource(id = R.drawable.favorite_button_full),
                         contentDescription = null,
                         modifier = modifier
-                            .size(30.dp),
+                            .size(25.dp),
                         colorFilter = ColorFilter.tint(color = Color(0xFFFFD600))
                     )
                     Spacer(modifier = modifier.width(5.dp))
                     Text(
                         text = "${(movie.voteAverage * 10).toInt()}%",
                         style = TextStyle(
-                            fontSize = 30.sp
+                            fontSize = 25.sp
                         ),
                         color = Color(0xFF4A148C)
                     )
@@ -213,13 +195,14 @@ fun DrawScreen(movie: MovieEntity,
                     Text(
                         text = movie.originalLanguage,
                         style = TextStyle(
-                            fontSize = 30.sp
+                            fontSize = 25.sp
                         ),
                         color = Color(0xFF4A148C)
                     )
                 }
                 
                 item {
+                    val genreColors = GenreColors(context = LocalContext.current)
                     movie.genreIds.forEach { id ->
                         val genreName = getGenreNameById(genres, id) ?: "Unknown"
                         val textMeasurer = rememberTextMeasurer()
@@ -299,15 +282,37 @@ fun DrawScreen(movie: MovieEntity,
                         }
                     }
                 }
-
-                item {
-                    TODO("Story line")
-                }
-
-                item {
-                    TODO("Overview")
-                }
             }
+        }
+
+        item {
+            Text (
+                text = "Story Line",
+                modifier = modifier
+                    .padding(vertical = 30.dp),
+                color = Color(0xFF4A148C),
+                style = TextStyle(
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.Bold,
+                    textIndent = TextIndent(10.sp)
+                ),
+            )
+        }
+
+        item {
+            Text(
+                text = movie.overview,
+                modifier = modifier.
+                padding(bottom = 20.dp),
+                color = Color(0xFF4A148C),
+                style = TextStyle(
+                    fontSize = 20.sp,
+                    textAlign = TextAlign.Justify,
+                    textIndent = TextIndent(30.sp),
+                    lineHeight = 25.sp
+                ),
+
+            )
         }
     }
 }
@@ -398,7 +403,7 @@ class GradientTransformation : BitmapTransformation() {
     }
 
     companion object {
-        private const val ID = "com.example.yourapp.GradientTransformation"
+        private const val ID = "com.example.MovieApp.GradientTransformation"
         private val ID_BYTES = ID.toByteArray(Key.CHARSET)
     }
 }
@@ -408,14 +413,16 @@ class GradientTransformation : BitmapTransformation() {
 fun PreviewDetailScreen() {
     val movie = MovieEntity(
         0,
-        false,
+        favourite = false,
         false,
         "/fqv8v6AycXKsivp1T5yKtLbGXce.jpg",
         listOf(1,2,3),
         3123,
         "en",
         "test",
-        "testoverview",
+        StringBuilder().apply {
+            (0..199).forEach { append("wwwww") }
+        }.toString(),
         7.88,
         "/gKkl37BQuKTanygYQG1pyYgLVgf.jpg",
         "2022-05-21",
@@ -431,7 +438,5 @@ fun PreviewDetailScreen() {
         GenreEntity(3, "Crime")
     )
 
-    val genreColors = GenreColors(Application())
-
-    DrawScreen(movie = movie, genres = genres, onBackClick = {}, onFavoriteClick = {}, genreColors = genreColors)
+    DrawScreen(movie = movie, genres = genres, onBackClick = {}, onFavoriteClick = {})
 }

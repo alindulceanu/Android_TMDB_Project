@@ -46,14 +46,15 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.currentCompositionLocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
-import com.example.movie.database.GenreDatabase
 import com.example.movie.database.MovieDatabase
 import com.example.movie.ui.GenreColors
 import com.example.movie.ui.screens.DetailScreen
+import com.example.movie.ui.screens.LoginScreen
 import com.example.movie.ui.screens.MainScreen
 import com.example.movie.viewmodel.MovieViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -62,8 +63,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity: ComponentActivity() {
-    @Inject
-    lateinit var  genreColors: GenreColors
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -72,7 +72,7 @@ class MainActivity: ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MyApp(genreColors)
+                    MyApp()
                 }
             }
         }
@@ -80,13 +80,25 @@ class MainActivity: ComponentActivity() {
 }
 
 @Composable
-fun MyApp(genreColors: GenreColors) {
+fun MyApp() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "movieList") {
-        composable("movieList") { MainScreen(navController) }
+    NavHost(navController = navController, startDestination = "loginScreen") {
+        composable("loginScreen") { LoginScreen(navController) }
+        composable("movieList/{username}") {backStackEntry ->
+            val username = backStackEntry.arguments?.getString("username")
+            if (username != null) {
+                MainScreen(navController, username)
+            } else {
+                Text("Invalid Username")
+            }
+        }
         composable("itemDetail/{itemId}") { backStackEntry ->
             val itemId = backStackEntry.arguments?.getString("itemId")
-            DetailScreen(navController, movieId = itemId!!, genreColors = genreColors)
+            if (itemId != null) {
+                DetailScreen(navController, movieId = itemId)
+            } else {
+                Text("Invalid item ID")
+            }
         }
     }
 }

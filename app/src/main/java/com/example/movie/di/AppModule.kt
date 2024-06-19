@@ -1,13 +1,13 @@
 package com.example.movie.di
 
 import android.app.Application
-import android.content.Context
 import androidx.room.Room
-import com.example.movie.database.GenreDatabase
 import com.example.movie.database.MovieDatabase
 import com.example.movie.database.dao.GenreDao
 import com.example.movie.database.dao.MovieDao
+import com.example.movie.database.dao.UserDao
 import com.example.movie.viewmodel.repositories.GenreRepository
+import com.example.movie.viewmodel.repositories.LoginRepository
 import com.example.movie.viewmodel.repositories.MovieRepository
 import dagger.Module
 import dagger.Provides
@@ -31,23 +31,23 @@ object AppModule {
     }
     @Provides
     @Singleton
-    fun provideGenreDatabase(app: Application): GenreDatabase {
-        return Room
-            .databaseBuilder(
-                app,
-                GenreDatabase::class.java,
-                "genre_db")
-            .build()
-    }
-    @Provides
-    @Singleton
     fun provideMovieDao(db: MovieDatabase): MovieDao {
-        return db.dao
+        return db.movieDao
     }
     @Provides
     @Singleton
-    fun provideGenreDao(db: GenreDatabase): GenreDao {
-        return db.dao
+    fun provideGenreDao(db: MovieDatabase): GenreDao {
+        return db.genreDao
+    }
+    @Provides
+    @Singleton
+    fun provideUserDao(db: MovieDatabase): UserDao {
+        return db.userDao
+    }
+    @Provides
+    @Singleton
+    fun provideLoginRepository(dao: UserDao): LoginRepository{
+        return LoginRepository(dao)
     }
     @Provides
     @Singleton
@@ -56,7 +56,7 @@ object AppModule {
     }
     @Provides
     @Singleton
-    fun provideMovieRepository(dao: MovieDao): MovieRepository{
-        return MovieRepository(dao)
+    fun provideMovieRepository(movieDao: MovieDao, userDao: UserDao): MovieRepository{
+        return MovieRepository(movieDao, userDao)
     }
 }

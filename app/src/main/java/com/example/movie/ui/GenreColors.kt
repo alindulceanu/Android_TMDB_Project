@@ -2,22 +2,16 @@ package com.example.movie.ui
 
 import android.app.Application
 import android.content.Context
-import android.graphics.Color
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.content.ContextCompat
 import com.example.movie.R
-import dagger.Provides
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 
-class GenreColors @Inject constructor( context: Application){
+class GenreColors(context: Context){
     private val genreColorMap = mutableMapOf<String, Int>()
 
     init {
         initialize(context)
     }
-    private fun initialize(context: Application) {
+    private fun initialize(context: Context) {
         genreColorMap["Adventure"] = ContextCompat.getColor(context, R.color.Adventure)
         genreColorMap["Fantasy"] = ContextCompat.getColor(context, R.color.Fantasy)
         genreColorMap["Animation"] = ContextCompat.getColor(context, R.color.Animation)

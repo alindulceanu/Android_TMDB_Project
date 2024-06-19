@@ -33,12 +33,11 @@ class DetailViewModel @Inject constructor(
 
     private val _movie = MutableLiveData<MovieEntity?>()
     val movie: LiveData<MovieEntity?> get() = _movie
-    fun fetchItemById(id: Int) {
+    fun fetchItemById(idDatabase: Int) {
         viewModelScope.launch {
-            movieRepository.getMovieById(id).collect{ fetchedMovie ->
+            movieRepository.getMovieById(idDatabase).collect{ fetchedMovie ->
                 _movie.postValue(fetchedMovie)
             }
-
         }
     }
     fun getAllGenres(){
@@ -48,5 +47,13 @@ class DetailViewModel @Inject constructor(
     }
     private suspend fun insertAllGenres(genres: List<GenreEntity>){
         genreRepository.insertAllGenres(*genres.toTypedArray())
+    }
+
+    fun favoriteMovie(){
+        viewModelScope.launch {
+            _movie.value?.let{currentMovie ->
+                movieRepository.favoriteMovie(currentMovie.idDatabase)
+            }
+        }
     }
 }
