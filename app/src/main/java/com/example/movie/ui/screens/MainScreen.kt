@@ -33,6 +33,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -88,8 +89,8 @@ fun MainScreen(nav: NavController,
             showButtons = showButtons,
             onDisconnectClick = {
                 coroutineScope.launch {
-                    nav.navigate("loginScreen")
                     movieViewModel.disconnectUser(username)
+                    nav.navigate("loginScreen")
                 }
             },
             onToggleClick = { showButtons = !showButtons }
@@ -173,7 +174,7 @@ data class SortTabs(
 
 @Composable
 fun SortTabs(tabs: List<SortTabs>, onClick: (FilterType) -> Unit, modifier: Modifier = Modifier){
-    var selectedTabIndex by remember {
+    var selectedTabIndex by rememberSaveable {
         mutableIntStateOf(0)
     }
     Column(
@@ -282,7 +283,7 @@ fun GlideImageComposable(
 @Composable
 fun MainScreenPreview(){
     val modifier = Modifier
-    val movies: List<MovieEntity> = listOf(MovieEntity(0,false,false,"/fqv8v6AycXKsivp1T5yKtLbGXce.jpg", listOf(1,2,3),3123,"en","test", "testoverview", 7.88, "/gKkl37BQuKTanygYQG1pyYgLVgf.jpg", "2022-05-21", "testtitleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",false, 7.45,1231),MovieEntity(0,false,false,"/fqv8v6AycXKsivp1T5yKtLbGXce.jpg", listOf(1,2,3),3123,"en","test", "testoverview", 7.88, "/gKkl37BQuKTanygYQG1pyYgLVgf.jpg", "2022-05-21", "testtitle",false, 7.45,1231))
+    val movies: List<MovieEntity> = listOf(MovieEntity(0,false,"/fqv8v6AycXKsivp1T5yKtLbGXce.jpg", listOf(1,2,3),3123,"en","test", "testoverview", 7.88, "/gKkl37BQuKTanygYQG1pyYgLVgf.jpg", "2022-05-21", "testtitleeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",false, 7.45,1231),MovieEntity(0,false,"/fqv8v6AycXKsivp1T5yKtLbGXce.jpg", listOf(1,2,3),3123,"en","test", "testoverview", 7.88, "/gKkl37BQuKTanygYQG1pyYgLVgf.jpg", "2022-05-21", "testtitle",false, 7.45,1231))
     Column(modifier = modifier.fillMaxWidth()) {
         SortTabs(tabs = sortTabs,{}, modifier = modifier)
         Spacer(modifier = modifier.height(100.dp))

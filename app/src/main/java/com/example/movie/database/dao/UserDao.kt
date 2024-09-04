@@ -27,6 +27,12 @@ interface UserDao {
     @Query("UPDATE UserEntity SET isSaved = 1 WHERE userName = :username")
     suspend fun saveUser(username: String)
 
-    @Query("UPDATE UserEntity SET isSaved = 0 WHERE userName = :username")
+    @Query("UPDATE UserEntity SET isSaved = 0, isActive = 0 WHERE userName = :username")
     suspend fun disconnectUser(username: String)
+
+    @Query("UPDATE UserEntity SET isActive = 1 WHERE userName = :username")
+    suspend fun activateUser(username: String)
+
+    @Query("SELECT * FROM UserEntity WHERE isActive = 1")
+    fun getActiveUser(): Flow<UserEntity>?
 }

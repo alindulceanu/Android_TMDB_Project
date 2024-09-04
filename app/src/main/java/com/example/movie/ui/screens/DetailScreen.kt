@@ -413,7 +413,6 @@ class GradientTransformation : BitmapTransformation() {
 fun PreviewDetailScreen() {
     val movie = MovieEntity(
         0,
-        favourite = false,
         false,
         "/fqv8v6AycXKsivp1T5yKtLbGXce.jpg",
         listOf(1,2,3),

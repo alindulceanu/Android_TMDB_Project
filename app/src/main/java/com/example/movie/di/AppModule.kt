@@ -3,12 +3,14 @@ package com.example.movie.di
 import android.app.Application
 import androidx.room.Room
 import com.example.movie.database.MovieDatabase
+import com.example.movie.database.dao.FavoriteDao
 import com.example.movie.database.dao.GenreDao
 import com.example.movie.database.dao.MovieDao
 import com.example.movie.database.dao.UserDao
+import com.example.movie.viewmodel.repositories.FavoriteRepository
 import com.example.movie.viewmodel.repositories.GenreRepository
-import com.example.movie.viewmodel.repositories.LoginRepository
 import com.example.movie.viewmodel.repositories.MovieRepository
+import com.example.movie.viewmodel.repositories.UserRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -44,10 +46,16 @@ object AppModule {
     fun provideUserDao(db: MovieDatabase): UserDao {
         return db.userDao
     }
+
     @Provides
     @Singleton
-    fun provideLoginRepository(dao: UserDao): LoginRepository{
-        return LoginRepository(dao)
+    fun provideFavoriteDao(db: MovieDatabase): FavoriteDao {
+        return db.favoriteDao
+    }
+    @Provides
+    @Singleton
+    fun provideUserRepository(dao: UserDao): UserRepository {
+        return UserRepository(dao)
     }
     @Provides
     @Singleton
@@ -56,7 +64,13 @@ object AppModule {
     }
     @Provides
     @Singleton
-    fun provideMovieRepository(movieDao: MovieDao, userDao: UserDao): MovieRepository{
-        return MovieRepository(movieDao, userDao)
+    fun provideMovieRepository(movieDao: MovieDao): MovieRepository{
+        return MovieRepository(movieDao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideFavoriteRepository(favoriteDao: FavoriteDao): FavoriteRepository {
+        return FavoriteRepository(favoriteDao)
     }
 }

@@ -1,19 +1,16 @@
 package com.example.movie.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import com.example.movie.data.remote.MovieService
-import com.example.movie.database.dao.MovieDao
-import com.example.movie.database.model.GenreEntity
 import com.example.movie.database.model.MovieEntity
 import com.example.movie.viewmodel.events.FilterType
 import com.example.movie.viewmodel.events.MovieEvents
-import com.example.movie.viewmodel.repositories.GenreRepository
+import com.example.movie.viewmodel.repositories.FavoriteRepository
 import com.example.movie.viewmodel.repositories.MovieRepository
+import com.example.movie.viewmodel.repositories.UserRepository
 import com.example.movie.viewmodel.state.MovieState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -21,9 +18,10 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,8 +30,11 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MovieViewModel @Inject constructor(
-    private val repository: MovieRepository,
-    private var savedStateHandle: SavedStateHandle
+    private val movieRepository: MovieRepository,
+    private val userRepository: UserRepository,
+    private val favoriteRepository: FavoriteRepository,
+    private var savedStateHandle: SavedStateHandle,
+
 ): ViewModel() {
 
     init {
@@ -44,10 +45,8 @@ class MovieViewModel @Inject constructor(
                 val movies = service.getMovies().results
                 insertMoviesFromRequest(movies)
             } catch (e: IOException) {
-                // Handle network error
                 _state.update { it.copy(message = "Network error: ${e.message}") }
             } catch (e: Exception) {
-                // Handle other errors
                 _state.update { it.copy(message = "Unexpected error: ${e.message}") }
             }
         }
@@ -59,9 +58,19 @@ class MovieViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     private val _movies = filterType
         .flatMapLatest { filterType ->
-            repository.sortMovies(filterType)
+            when (filterType) {
+                FilterType.FAVORITES -> userRepository.getActiveUser()
+                    ?.flatMapLatest { user ->
+                        favoriteRepository.getAllFavoritesFromUser(user.email)
+                            ?.flatMapLatest { favoriteMovies ->
+                                val favoriteIds = favoriteMovies.map { it.id }
+                                movieRepository.sortMovies(filterType, favoriteIds)
+                            } ?: flowOf(emptyList())
+                    } ?: flowOf(emptyList())
+                else -> movieRepository.sortMovies(filterType)
+            }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList<MovieEntity>())
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     private val _state = MutableStateFlow(MovieState(isLoaded = true))
 
@@ -79,22 +88,17 @@ class MovieViewModel @Inject constructor(
                 savedStateHandle["filterType"] = event.filterType
                 _filterType.value = event.filterType
             }
-            is MovieEvents.FavoriteMovie -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    repository.favoriteMovie(event.idDatabase)
-                }
-            }
         }
     }
 
     private suspend fun insertMoviesFromRequest (movies: List<MovieEntity>) {
         movies.forEach { movie ->
-            repository.insertMovie(movie)
+            movieRepository.insertMovie(movie)
         }
     }
 
     suspend fun disconnectUser(username: String) {
-        repository.disconnectUser(username)
+        userRepository.disconnectUser(username)
     }
 }
 

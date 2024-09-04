@@ -6,7 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movie.database.model.UserEntity
 import com.example.movie.viewmodel.events.LoginOrRegister
-import com.example.movie.viewmodel.repositories.LoginRepository
+import com.example.movie.viewmodel.repositories.UserRepository
 import com.example.movie.viewmodel.state.UserState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.firstOrNull
@@ -15,12 +15,12 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val repository: LoginRepository
+    private val userRepository: UserRepository
 ) : ViewModel() {
 
     init {
         viewModelScope.launch {
-            val user: UserEntity? = repository.getSavedUsers().firstOrNull()
+            val user: UserEntity? = userRepository.getSavedUsers().firstOrNull()
 
             if (user != null) {
                 login(user.userName, user.password)
@@ -28,6 +28,8 @@ class LoginViewModel @Inject constructor(
             _state.value = _state.value?.copy(isVerifying = false)
         }
     }
+
+    
 
     private val _state = MutableLiveData<UserState>().apply { value = UserState() }
 
@@ -39,12 +41,17 @@ class LoginViewModel @Inject constructor(
 
     fun register(user: UserEntity, confirmPassword: String) {
         viewModelScope.launch {
-            val existingUser = repository.getUserByUsername(user.userName).firstOrNull()
+            val existingUser = userRepository.getUserByUsername(user.userName).firstOrNull()
+            val existingEmail = userRepository.getUserByEmail(user.email).firstOrNull()
             if (user.password != confirmPassword){
                 _state.value = _state.value?.copy( message = "Passwords do not match, please try again!")
             }
+            else if (existingEmail != null) {
+                _state.value = _state.value?.copy( message = "This email is already used!")
+            }
             else if (existingUser == null) {
-                repository.insertUser(user)
+                userRepository.insertUser(user)
+                userRepository.activateUser(user.userName)
                 _state.value = _state.value?.copy(isSuccess = true, lastUserName = user.userName)
             } else {
                 _state.value = _state.value?.copy(message = "This user already exists!")
@@ -53,11 +60,12 @@ class LoginViewModel @Inject constructor(
     }
     fun login(username: String, password: String) {
         viewModelScope.launch {
-            val user = repository.getUserByUsername(username).firstOrNull()
+            val user = userRepository.getUserByUsername(username).firstOrNull()
             if (user == null || user.password != password) {
-                _state.value = _state.value?.copy(message = "This user was not found!")
+                _state.value = _state.value?.copy(message = "This user does not exist or password is incorrect!")
             } else {
-                repository.saveUser(user.userName)
+                userRepository.saveUser(username)
+                userRepository.activateUser(username)
                 _state.value = _state.value?.copy(isSuccess = true, lastUserName = user.userName)
             }
         }

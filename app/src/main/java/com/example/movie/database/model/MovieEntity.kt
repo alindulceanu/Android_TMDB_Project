@@ -19,9 +19,6 @@ data class MovieEntity(
     @Transient
     val idDatabase : Int = 0,
 
-    @Transient
-    var favourite : Boolean = false,
-
     val adult : Boolean,
     @SerialName("backdrop_path") val backdropPath : String?,
 

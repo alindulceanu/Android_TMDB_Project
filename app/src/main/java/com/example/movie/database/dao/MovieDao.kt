@@ -21,8 +21,8 @@ interface MovieDao {
     @Delete
     suspend fun deleteMovie(movie: MovieEntity)
 
-    @Query("UPDATE MovieEntity SET favourite = NOT favourite WHERE idDatabase = :idDatabase")
-    suspend fun favoriteMovie(idDatabase: Int)
+//    @Query("UPDATE MovieEntity SET favourite = NOT favourite WHERE idDatabase = :idDatabase")
+//    suspend fun favoriteMovie(idDatabase: Int)
 
     @Query("SELECT * FROM MovieEntity")
     fun getAllMovies(): Flow<List<MovieEntity>>
@@ -36,8 +36,8 @@ interface MovieDao {
     @Query("SELECT * FROM MovieEntity ORDER BY popularity DESC")
     fun orderMoviesByPopularity(): Flow<List<MovieEntity>>
 
-    @Query("SELECT * FROM MovieEntity WHERE favourite = 1 ORDER BY title")
-    fun orderFavouriteMovies(): Flow<List<MovieEntity>>
+    @Query("SELECT * FROM MovieEntity WHERE idDatabase IN (:favoriteIds) ORDER BY title")
+    fun orderFavouriteMovies(favoriteIds: List<Int>): Flow<List<MovieEntity>>
 
     @Query("SELECT * FROM MovieEntity ORDER BY releaseDate DESC")
     fun orderMoviesByDate(): Flow<List<MovieEntity>>

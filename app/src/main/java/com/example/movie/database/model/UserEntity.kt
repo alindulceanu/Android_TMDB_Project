@@ -9,5 +9,6 @@ data class UserEntity (
     val email: String,
     val userName: String,
     val password: String,
-    var isSaved: Boolean = false
+    var isSaved: Boolean = false,
+    var isActive: Boolean = false,
 )

@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
-class LoginRepository @Inject constructor(
+class UserRepository @Inject constructor(
     private val userDao: UserDao
 ) {
     suspend fun insertUser(user: UserEntity) {
@@ -15,20 +15,29 @@ class LoginRepository @Inject constructor(
 
     fun getUserByUsername(username: String): Flow<UserEntity?> {
         return userDao.getUserByUsername(username)
-            .map { it ?: null }
     }
 
     fun getUserByEmail(email: String): Flow<UserEntity?> {
         return userDao.getUserByEmail(email)
-            .map { it ?: null }
     }
 
     fun getSavedUsers(): Flow<UserEntity?> {
         return userDao.getSavedUser()
-            .map { it ?: null}
     }
 
     suspend fun saveUser(username: String) {
         userDao.saveUser(username)
+    }
+
+    suspend fun disconnectUser(username: String) {
+        userDao.disconnectUser(username)
+    }
+
+    suspend fun activateUser(username: String) {
+        userDao.activateUser(username)
+    }
+
+    fun getActiveUser(): Flow<UserEntity>? {
+        return userDao.getActiveUser()
     }
 }
